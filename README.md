@@ -187,8 +187,7 @@ ssdc-slot-watcher/
 This project is for educational purposes. Use responsibly and in accordance with SSDC's terms of service.
 
 ## 🤝 Contributing
-
-For @vekron and @brrr192 - If you find bugs or want to add features, modify the code and share!
+If you find bugs or want to add features, modify the code and share!
 
 ## 📞 Support
 
