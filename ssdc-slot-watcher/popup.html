@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SSDC Slot Watcher</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .status {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .status-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-label {
+      opacity: 0.9;
+    }
+
+    .status-value {
+      font-weight: 600;
+      padding: 4px 12px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .status-value.active {
+      background: #10b981;
+    }
+
+    .status-value.inactive {
+      background: #ef4444;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #startBtn {
+      background: #10b981;
+      color: white;
+    }
+
+    #startBtn:hover {
+      background: #059669;
+    }
+
+    #startBtn.running {
+      background: #f59e0b;
+      animation: pulse 2s infinite;
+    }
+
+    #startBtn.running:hover {
+      background: #d97706;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    #stopBtn {
+      background: #ef4444;
+      color: white;
+    }
+
+    #stopBtn:hover {
+      background: #dc2626;
+    }
+
+    #runNowBtn {
+      width: 100%;
+      background: #3b82f6;
+      color: white;
+      font-size: 13px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    #runNowBtn:hover {
+      background: #2563eb;
+    }
+
+    #runNowBtn:disabled {
+      background: #6b7280;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    #configBtn {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+      padding: 10px;
+    }
+
+    #configBtn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 15px;
+    }
+
+    .notification {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 12px;
+      text-align: center;
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .notification.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚗 SSDC Slot Watcher</h1>
+      <p>Automated slot booking assistant</p>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <div class="status">
+      <div class="status-item">
+        <span class="status-label">Status:</span>
+        <span id="watcherStatus" class="status-value inactive">Inactive</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Last Check:</span>
+        <span id="lastCheck" class="status-value">Never</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Telegram Bot:</span>
+        <span id="botStatus" class="status-value inactive">Inactive</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn">▶ Start</button>
+      <button id="stopBtn">⏹ Stop</button>
+    </div>
+
+    <button id="runNowBtn">⚡ Run Check Now</button>
+    <button id="configBtn">⚙ Configuration</button>
+
+    <div class="footer">
+      Control via Telegram: /start /stop /status
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

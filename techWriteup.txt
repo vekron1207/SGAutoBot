@@ -1,0 +1,274 @@
+📘 SSDC Auto Slot Watcher – Technical Design Document
+1. Objective
+
+Build a Chrome browser extension that:
+
+Opens SSDC booking page
+
+Repeatedly checks earliest availability every 2 minutes
+
+Handles modal when slots are full
+
+Stops when valid slots appear
+
+Automatically selects a slot
+
+Sends Telegram alert to:
+
+@vekron
+
+@brrr192
+
+Avoids account throttling / blocking
+
+2. Constraints & Safety
+
+⚠ Critical:
+
+SSDC likely has anti-bot rate limits
+
+Must simulate human behavior
+
+Never spam requests
+
+Random jitter added to interval
+
+We will:
+
+Check every 120–150 seconds (randomized)
+
+Add human delay between clicks (500–1200ms)
+
+Pause after slot found
+
+Stop loop once booked
+
+3. High-Level Architecture
+Chrome Extension
+├── content.js        → DOM automation
+├── background.js     → scheduler + Telegram API
+├── popup.html        → start/stop UI
+├── popup.js
+├── manifest.json
+
+
+Flow:
+
+Start extension
+↓
+Select Practical Lesson
+↓
+Click "Get Earliest Date"
+↓
+If modal → close → wait → retry
+Else → check availability
+↓
+Scan matrix
+↓
+If slot found → click slot
+↓
+Send Telegram alert
+↓
+Stop loop
+
+4. DOM Selectors We Use
+Dropdown
+#BookingType
+
+Get earliest date
+#button-searchDate
+
+Modal text
+#modalMsgContent
+
+Modal close button
+button[data-dismiss="modal"]
+
+Check availability button
+#btn_checkforava
+
+Slot selector
+a.slotBooking
+
+5. Extension Manifest
+manifest.json
+{
+  "manifest_version": 3,
+  "name": "SSDC Slot Watcher",
+  "version": "1.0",
+  "permissions": ["scripting", "tabs", "storage", "alarms"],
+  "host_permissions": ["https://www.ssdcl.com.sg/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.ssdcl.com.sg/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
+
+6. Scheduler (Rate Limiting)
+
+We use Chrome alarms instead of setInterval.
+
+background.js
+chrome.alarms.create("checkSlots", {
+  delayInMinutes: 2,
+  periodInMinutes: 2
+});
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name !== "checkSlots") return;
+
+  const tabs = await chrome.tabs.query({
+    url: "*://www.ssdcl.com.sg/*"
+  });
+
+  if (tabs.length === 0) return;
+
+  chrome.tabs.sendMessage(tabs[0].id, { action: "RUN_CHECK" });
+});
+
+7. Telegram Integration
+
+Create bot:
+
+👉 https://t.me/BotFather
+
+Get token
+
+Telegram send function
+async function sendTelegram(message) {
+  const token = "YOUR_BOT_TOKEN";
+  const users = ["vekron", "brrr192"];
+
+  for (const user of users) {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: `@${user}`,
+        text: message
+      })
+    });
+  }
+}
+
+8. Content Script Logic
+content.js
+
+This runs inside SSDC page.
+
+chrome.runtime.onMessage.addListener(async (msg) => {
+  if (msg.action === "RUN_CHECK") {
+    await runCheck();
+  }
+});
+
+async function humanDelay(min = 500, max = 1200) {
+  const ms = Math.random() * (max - min) + min;
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function runCheck() {
+  console.log("Checking SSDC...");
+
+  // select Practical Lesson
+  const select = document.querySelector("#BookingType");
+  if (select) {
+    select.value = "PL";
+    select.dispatchEvent(new Event("change"));
+  }
+
+  await humanDelay();
+
+  // click earliest date
+  document.querySelector("#button-searchDate")?.click();
+
+  await wait(2000);
+
+  const modal = document.querySelector("#modalMsgContent");
+
+  if (modal && modal.innerText.includes("Fully Booked")) {
+    console.log("No slots");
+    document.querySelector('button[data-dismiss="modal"]')?.click();
+    return;
+  }
+
+  // click check availability
+  document.querySelector("#btn_checkforava")?.click();
+
+  await wait(2000);
+
+  const slot = document.querySelector("a.slotBooking");
+
+  if (slot) {
+    const text = slot.innerText.trim();
+    slot.click();
+
+    chrome.runtime.sendMessage({
+      action: "SLOT_FOUND",
+      slot: text
+    });
+  }
+}
+
+function wait(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+9. Background Telegram Trigger
+
+Add to background.js:
+
+chrome.runtime.onMessage.addListener(async (msg) => {
+  if (msg.action === "SLOT_FOUND") {
+    await sendTelegram(`🚨 SSDC Slot Found: ${msg.slot}`);
+    chrome.alarms.clear("checkSlots");
+  }
+});
+
+10. Popup UI
+popup.html
+<button id="start">Start Watcher</button>
+<button id="stop">Stop</button>
+<script src="popup.js"></script>
+
+popup.js
+document.getElementById("start").onclick = () => {
+  chrome.alarms.create("checkSlots", {
+    delayInMinutes: 2,
+    periodInMinutes: 2
+  });
+};
+
+document.getElementById("stop").onclick = () => {
+  chrome.alarms.clear("checkSlots");
+};
+
+11. Anti-Detection Strategy
+
+We intentionally:
+
+Randomize delays
+
+Avoid fast loops
+
+Avoid repeated DOM hammering
+
+Use 2+ minute intervals
+
+Stop after success
+
+Optional improvements:
+
+Random user idle time
+
+Random scroll simulation
+
+Random mouse events

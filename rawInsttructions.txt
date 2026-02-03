@@ -1,0 +1,202 @@
+So i need to make a browser extension, that i can start on page: https://www.ssdcl.com.sg/User/Booking/AddBooking?bookingType=PL
+
+I need to select Pratical Lesson in the drop down menu:
+Element: <select class="form-control max-width-375" id="BookingType" name="BookingType" onchange="ReloadUponChanged()"><option selected="selected" value="PL">Practical Lesson</option>
+<option value="SL">Simulator Lesson</option>
+<option value="TT">Theory Test</option>
+<option value="PT">Practical Test</option>
+<option value="TL">Theory Lesson</option>
+</select>
+
+Then click on: <input type="button" class="btn float-right btn-general-form check-for-availability prevent_doubleclick" value="Get The Earliest Date" id="button-searchDate">
+
+If a modal :
+<div class="modal-body" id="modalMsgContent">All the slots are Fully Booked.</div>
+
+Comes, Click on: <button type="button" class="btn btn-general-short" data-dismiss="modal">Close</button> in the modal, and then go ahead and click on Get Earliest date to check, for the valid slots.
+
+- this will be a loop of modal closing and checking the dates, until we find valid dates. 
+
+
+If modal does not appear, click on button: Check for
+Element: <a id="btn_checkforava" href="javascript:verify();" class="btn float-right btn-general-form check-for-availability prevent_doubleclick">Check for availability</a>
+
+THis will bring a matrix of slots:
+<div class="col-md-12 pl-20 text-right fuild-1024">
+                            <div id="table-scroll" class="table-scroll">
+                                <div class="table-responsive available-slots table-wrap">
+                                    <table class="table table-borderless table-striped no-background clear-padding-first-child available-slots-mobile main-table">
+                                        <thead>
+                                            <tr>
+                            <th width="12%" class="text-left nowrap fixed-side">Session Date</th>                             <th width="12%" class="text-center">
+                                <b>1</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>2</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>3</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>4</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>5</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>6</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>7</b>
+                            </th>                                             </tr>
+                                        </thead>
+                                        <tbody class="tr-border-bottom">
+                                                <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('09 Feb 2026');">09 Feb 2026</a><br>
+                                                        Monday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('10 Feb 2026');">10 Feb 2026</a><br>
+                                                        Tuesday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center">
+                            <a href="#" id="1797286_3_10/2/2026 12:00:00 am_1" class="slotBooking">
+                                12:15 PM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center">
+                            <a href="#" id="1797288_6_10/2/2026 12:00:00 am_1" class="slotBooking">
+                                6:20 PM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('11 Feb 2026');">11 Feb 2026</a><br>
+                                                        Wednesday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('12 Feb 2026');">12 Feb 2026</a><br>
+                                                        Thursday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center">
+                            <a href="#" id="1797461_6_12/2/2026 12:00:00 am_1" class="slotBooking">
+                                6:20 PM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('13 Feb 2026');">13 Feb 2026</a><br>
+                                                        Friday
+                                                    </th>
+
+                        <td class="pb-15 text-center">
+                            <a href="#" id="1797463_1_13/2/2026 12:00:00 am_1" class="slotBooking">
+                                8:00 AM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('14 Feb 2026');">14 Feb 2026</a><br>
+                                                        Saturday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('15 Feb 2026');">15 Feb 2026</a><br>
+                                                        Sunday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr> 
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <table class="table table-borderless table-striped no-background clear-padding-first-child available-slots-mobile main-table clone">
+                                        <thead>
+                                            <tr>
+                            <th width="12%" class="text-left nowrap fixed-side">Session Date</th>                             <th width="12%" class="text-center">
+                                <b>1</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>2</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>3</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>4</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>5</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>6</b>
+                            </th>                             <th width="12%" class="text-center">
+                                <b>7</b>
+                            </th>                                             </tr>
+                                        </thead>
+                                        <tbody class="tr-border-bottom">
+                                                <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('09 Feb 2026');">09 Feb 2026</a><br>
+                                                        Monday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('10 Feb 2026');">10 Feb 2026</a><br>
+                                                        Tuesday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center">
+                            <a href="#" id="1797286_3_10/2/2026 12:00:00 am_1" class="slotBooking">
+                                12:15 PM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center">
+                            <a href="#" id="1797288_6_10/2/2026 12:00:00 am_1" class="slotBooking">
+                                6:20 PM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('11 Feb 2026');">11 Feb 2026</a><br>
+                                                        Wednesday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('12 Feb 2026');">12 Feb 2026</a><br>
+                                                        Thursday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center">
+                            <a href="#" id="1797461_6_12/2/2026 12:00:00 am_1" class="slotBooking">
+                                6:20 PM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('13 Feb 2026');">13 Feb 2026</a><br>
+                                                        Friday
+                                                    </th>
+
+                        <td class="pb-15 text-center">
+                            <a href="#" id="1797463_1_13/2/2026 12:00:00 am_1" class="slotBooking">
+                                8:00 AM ✔
+                            </a>
+                        </td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('14 Feb 2026');">14 Feb 2026</a><br>
+                                                        Saturday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr>                                                 <tr>
+                                                    <th class="pb-15 text-left fixed-side">
+                                                        <a href="javascript:changeDate('15 Feb 2026');">15 Feb 2026</a><br>
+                                                        Sunday
+                                                    </th>
+
+                        <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                         <td class="pb-15 text-center"><span class="c-gray">n/a</span></td>                                                 </tr> 
+                                        </tbody>
+                                    </table></div>
+                        </div>
+
+in this we find valid times such as
+<a href="#" id="1797463_1_13/2/2026 12:00:00 am_1" class="slotBooking">
+                                8:00 AM ✔
+                            </a>
+
+And click on this time, and sends a telegram message to the user: @vekron and @brrr192
+
+I need a very in detail tech write-up for this, so I can share this with my team and they can get started, Please make sure to explictly tell everything in the write up. 
+
+Also, If we check for availability, this can block our account, so make sure we stay under limit, we can Click on get the earliest date button, every two minutes. 
