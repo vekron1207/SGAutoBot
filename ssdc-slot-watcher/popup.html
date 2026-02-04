@@ -194,6 +194,43 @@
     .notification.show {
       display: block;
     }
+
+    .interval-selector {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .interval-selector label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+
+    .interval-selector select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1f2937;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .interval-selector select:hover {
+      background: white;
+    }
+
+    .interval-selector select:focus {
+      outline: 2px solid #10b981;
+      outline-offset: 2px;
+    }
   </style>
 </head>
 <body>
@@ -223,6 +260,18 @@
     <div class="controls">
       <button id="startBtn">▶ Start</button>
       <button id="stopBtn">⏹ Stop</button>
+    </div>
+
+    <div class="interval-selector">
+      <label for="intervalSelect">⏱ Check Interval:</label>
+      <select id="intervalSelect">
+        <option value="1">Every 1 minute</option>
+        <option value="2" selected>Every 2 minutes (recommended)</option>
+        <option value="3">Every 3 minutes</option>
+        <option value="5">Every 5 minutes</option>
+        <option value="10">Every 10 minutes</option>
+        <option value="15">Every 15 minutes</option>
+      </select>
     </div>
 
     <button id="runNowBtn">⚡ Run Check Now</button>

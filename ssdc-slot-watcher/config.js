@@ -11,8 +11,8 @@ const CONFIG = {
   // 2. Visit: https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
   // 3. Look for "chat":{"id": YOUR_CHAT_ID}
   TELEGRAM_CHAT_IDS: [
-    741316379,  // @vekron (Varun Kashyap)
-    // Add @brrr192's chat ID here once they message the bot
+    741316379,   // @vekron (Varun Kashyap)
+    1683862950   // @brrr192 (BR)
   ],
 
   // Check interval (in minutes)

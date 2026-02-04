@@ -4,10 +4,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const stopBtn = document.getElementById('stopBtn');
   const runNowBtn = document.getElementById('runNowBtn');
   const configBtn = document.getElementById('configBtn');
+  const intervalSelect = document.getElementById('intervalSelect');
   const watcherStatus = document.getElementById('watcherStatus');
   const lastCheck = document.getElementById('lastCheck');
   const botStatus = document.getElementById('botStatus');
   const notification = document.getElementById('notification');
+
+  // Load saved interval
+  chrome.storage.local.get(['checkInterval'], (result) => {
+    if (result.checkInterval) {
+      intervalSelect.value = result.checkInterval;
+    }
+  });
 
   // Load and display current status
   await updateStatus();
@@ -65,6 +73,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       runNowBtn.textContent = '⚡ Run Check Now';
       showNotification('Error: ' + error.message, true);
     }
+  });
+
+  // Interval selector change
+  intervalSelect.addEventListener('change', async () => {
+    const interval = parseInt(intervalSelect.value);
+    await chrome.storage.local.set({ checkInterval: interval });
+    showNotification(`Check interval updated to ${interval} minute${interval > 1 ? 's' : ''}`);
+
+    // If watcher is running, restart it with new interval
+    chrome.runtime.sendMessage({ action: 'GET_STATUS' }, (response) => {
+      if (response && response.isRunning) {
+        showNotification('Restarting watcher with new interval...');
+        chrome.runtime.sendMessage({ action: 'STOP_WATCHER' }, () => {
+          setTimeout(() => {
+            chrome.runtime.sendMessage({ action: 'START_WATCHER' });
+          }, 500);
+        });
+      }
+    });
   });
 
   // Config button click

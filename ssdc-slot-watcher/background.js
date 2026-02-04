@@ -69,10 +69,16 @@ async function startWatcher() {
     throw new Error('Please add at least one chat ID in config.js');
   }
 
+  // Get custom interval from storage, or use default
+  const storage = await chrome.storage.local.get(['checkInterval']);
+  const intervalMinutes = storage.checkInterval || CONFIG.CHECK_INTERVAL_MINUTES;
+
+  console.log(`Setting up alarm with ${intervalMinutes} minute interval`);
+
   // Set up the alarm for periodic checking
   await chrome.alarms.create('checkSlots', {
-    delayInMinutes: CONFIG.CHECK_INTERVAL_MINUTES,
-    periodInMinutes: CONFIG.CHECK_INTERVAL_MINUTES
+    delayInMinutes: intervalMinutes,
+    periodInMinutes: intervalMinutes
   });
 
   // Start Telegram bot polling
@@ -83,7 +89,7 @@ async function startWatcher() {
   await chrome.storage.local.set({ isWatcherActive: true, botRunning: true });
 
   // Send notification to Telegram
-  await sendTelegramMessage('🟢 SSDC Slot Watcher started!\nI will check for slots every 2 minutes.');
+  await sendTelegramMessage(`🟢 SSDC Slot Watcher started!\nI will check for slots every ${intervalMinutes} minute${intervalMinutes > 1 ? 's' : ''}.`);
 
   // Trigger immediate first check after a short delay
   console.log('Scheduling immediate first check in 2 seconds...');
