@@ -4,7 +4,8 @@ Automated Chrome/Edge extension that monitors SSDC (Singapore Safety Driving Cen
 
 ## ✨ Features
 
-- 🔄 **Automatic Monitoring** - Checks for slots at customizable intervals (1-15 minutes)
+- 📚 **Theory & Practical Support** - Monitor slots for both Theory Tests and Practical Lessons
+- 🔄 **Automatic Monitoring** - Checks for slots at customizable intervals (10 seconds - 15 minutes)
 - 📱 **Telegram Integration** - Instant notifications with date, time, and timezone
 - 🎮 **Dual Control** - Control via browser extension popup OR Telegram bot commands
 - ⚡ **Manual Testing** - "Run Check Now" button for immediate testing

@@ -210,7 +210,90 @@
       opacity: 0.9;
     }
 
+    .interval-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .interval-selector input[type="number"] {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1f2937;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
     .interval-selector select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1f2937;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .interval-selector input:hover,
+    .interval-selector select:hover {
+      background: white;
+    }
+
+    .interval-selector input:focus,
+    .interval-selector select:focus {
+      outline: 2px solid #10b981;
+      outline-offset: 2px;
+    }
+
+    .quick-intervals {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .quick-interval-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 11px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-interval-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .quick-interval-btn:active {
+      transform: translateY(0);
+    }
+
+    .lesson-type-selector {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .lesson-type-selector label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+
+    .lesson-type-selector select {
       width: 100%;
       padding: 8px 12px;
       border-radius: 8px;
@@ -223,11 +306,11 @@
       transition: all 0.2s;
     }
 
-    .interval-selector select:hover {
+    .lesson-type-selector select:hover {
       background: white;
     }
 
-    .interval-selector select:focus {
+    .lesson-type-selector select:focus {
       outline: 2px solid #10b981;
       outline-offset: 2px;
     }
@@ -262,16 +345,35 @@
       <button id="stopBtn">⏹ Stop</button>
     </div>
 
-    <div class="interval-selector">
-      <label for="intervalSelect">⏱ Check Interval:</label>
-      <select id="intervalSelect">
-        <option value="1">Every 1 minute</option>
-        <option value="2" selected>Every 2 minutes (recommended)</option>
-        <option value="3">Every 3 minutes</option>
-        <option value="5">Every 5 minutes</option>
-        <option value="10">Every 10 minutes</option>
-        <option value="15">Every 15 minutes</option>
+    <div class="lesson-type-selector">
+      <label>📚 Lesson Type:</label>
+      <select id="lessonType">
+        <option value="PL" selected>Practical Lesson</option>
+        <option value="TT">Theory Test</option>
       </select>
+    </div>
+
+    <div class="interval-selector">
+      <label>⏱ Check Interval:</label>
+      <div class="interval-controls">
+        <input type="number" id="intervalValue" min="10" max="3600" value="120" placeholder="Enter value">
+        <select id="intervalUnit">
+          <option value="seconds" selected>Seconds</option>
+          <option value="minutes">Minutes</option>
+          <option value="hours">Hours</option>
+        </select>
+      </div>
+      <div class="quick-intervals">
+        <button class="quick-interval-btn" data-seconds="10">10s</button>
+        <button class="quick-interval-btn" data-seconds="20">20s</button>
+        <button class="quick-interval-btn" data-seconds="30">30s</button>
+        <button class="quick-interval-btn" data-seconds="60">1m</button>
+        <button class="quick-interval-btn" data-seconds="120">2m</button>
+        <button class="quick-interval-btn" data-seconds="180">3m</button>
+        <button class="quick-interval-btn" data-seconds="300">5m</button>
+        <button class="quick-interval-btn" data-seconds="600">10m</button>
+        <button class="quick-interval-btn" data-seconds="900">15m</button>
+      </div>
     </div>
 
     <button id="runNowBtn">⚡ Run Check Now</button>

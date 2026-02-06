@@ -108,21 +108,65 @@ async function runSlotCheck() {
   console.log('✓ Starting SSDC slot check...');
 
   try {
-    // Step 1: Select "Practical Lesson" from dropdown
+    // Get selected lesson type from storage (default: PL for Practical Lesson)
+    const storage = await chrome.storage.local.get(['lessonType']);
+    const desiredLessonType = storage.lessonType || 'PL';
+    const lessonTypeName = desiredLessonType === 'PL' ? 'Practical Lesson' : 'Theory Test';
+
+    console.log(`Checking for: ${lessonTypeName} (${desiredLessonType})`);
+
+    // Step 1: Select desired lesson type from dropdown
     console.log('Step 1: Checking booking type dropdown...');
     const bookingTypeSelect = document.querySelector('#BookingType');
     if (bookingTypeSelect) {
       console.log('✓ Found dropdown, current value:', bookingTypeSelect.value);
+      console.log('Available options:', Array.from(bookingTypeSelect.options).map(opt => `${opt.value} = ${opt.text}`));
 
-      // IMPORTANT: Only change if not already set to PL (changing triggers page reload!)
-      if (bookingTypeSelect.value !== 'PL') {
-        console.log('⚠ Not set to PL, changing... (this will reload the page)');
-        bookingTypeSelect.value = 'PL';
-        bookingTypeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-        console.log('✓ Dropdown changed, page will reload. Extension will auto-retry after reload.');
-        return { found: false, message: 'Dropdown changed, waiting for page reload' };
+      // Map lesson type codes to possible dropdown values
+      // SSDC might use full text or codes
+      const possibleValues = {
+        'PL': ['PL', 'Practical Lesson', 'practical', 'PRACTICAL LESSON'],
+        'TT': ['TT', 'Theory Test', 'theory', 'THEORY TEST', 'Theory']
+      };
+
+      const valuesToTry = possibleValues[desiredLessonType] || [desiredLessonType];
+      console.log(`Looking for values:`, valuesToTry);
+
+      // Check if current value matches any of our desired values
+      const currentValueMatches = valuesToTry.some(val =>
+        bookingTypeSelect.value === val ||
+        bookingTypeSelect.value.toLowerCase().includes(val.toLowerCase())
+      );
+
+      if (!currentValueMatches) {
+        console.log(`⚠ Current value "${bookingTypeSelect.value}" doesn't match ${desiredLessonType}, trying to change...`);
+
+        // Try to find the right option
+        let optionSet = false;
+        for (const tryValue of valuesToTry) {
+          // Try exact match first
+          const option = Array.from(bookingTypeSelect.options).find(opt =>
+            opt.value === tryValue || opt.text === tryValue ||
+            opt.value.toLowerCase() === tryValue.toLowerCase() ||
+            opt.text.toLowerCase() === tryValue.toLowerCase()
+          );
+
+          if (option) {
+            console.log(`✓ Found matching option: ${option.value} (${option.text})`);
+            bookingTypeSelect.value = option.value;
+            bookingTypeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            optionSet = true;
+            console.log('✓ Dropdown changed, page will reload. Extension will auto-retry after reload.');
+            return { found: false, message: 'Dropdown changed, waiting for page reload' };
+          }
+        }
+
+        if (!optionSet) {
+          console.error(`✗ Could not find option for ${desiredLessonType}`);
+          return { found: false, error: `Could not find ${lessonTypeName} option in dropdown` };
+        }
       } else {
-        console.log('✓ Already set to PL, no change needed!');
+        console.log(`✓ Already set to ${lessonTypeName}, no change needed!`);
       }
     } else {
       console.error('✗ Booking type dropdown NOT found!');
@@ -131,29 +175,55 @@ async function runSlotCheck() {
 
     // Step 2: Click "Get Earliest Date" button
     console.log('Step 2: Looking for earliest date button...');
-    const earliestDateBtn = document.querySelector('#button-searchDate');
+
+    // Try multiple possible selectors
+    const buttonSelectors = [
+      '#button-searchDate',
+      'button[onclick*="earliest"]',
+      'button[onclick*="Earliest"]',
+      'input[type="button"][onclick*="earliest"]',
+      'input[type="button"][onclick*="Earliest"]',
+      'a[onclick*="earliest"]',
+      'a[onclick*="Earliest"]'
+    ];
+
+    let earliestDateBtn = null;
+    for (const selector of buttonSelectors) {
+      try {
+        earliestDateBtn = document.querySelector(selector);
+        if (earliestDateBtn) {
+          console.log(`✓ Found button with selector: ${selector}`, earliestDateBtn);
+          break;
+        }
+      } catch (e) {
+        console.warn(`Invalid selector: ${selector}`);
+      }
+    }
+
+    // If still not found, search by button text content
+    if (!earliestDateBtn) {
+      console.log('Trying to find button by text content...');
+      const allButtons = Array.from(document.querySelectorAll('button, input[type="button"], a.btn'));
+      earliestDateBtn = allButtons.find(btn => {
+        const text = btn.textContent || btn.value || '';
+        return text.toLowerCase().includes('earliest') ||
+               text.toLowerCase().includes('get') && text.toLowerCase().includes('date');
+      });
+      if (earliestDateBtn) {
+        console.log('✓ Found button by text content:', earliestDateBtn);
+      }
+    }
+
     if (earliestDateBtn) {
-      console.log('✓ Found button:', earliestDateBtn);
       console.log('Clicking earliest date button...');
       earliestDateBtn.click();
       console.log('✓ Button clicked, waiting 2 seconds...');
       await wait(2000); // Wait for modal or response
       console.log('✓ Wait complete');
     } else {
-      console.error('✗ Earliest date button NOT found!');
-      console.log('Searching for alternative button selectors...');
-      // Try alternative selectors
-      const altBtn = document.querySelector('button:contains("Earliest")') ||
-                     document.querySelector('[onclick*="earliest"]') ||
-                     document.querySelector('.btn:contains("Earliest")');
-      if (altBtn) {
-        console.log('Found alternative button:', altBtn);
-        altBtn.click();
-        await wait(2000);
-      } else {
-        console.error('No earliest date button found with any selector!');
-        return { found: false, error: 'Earliest date button not found' };
-      }
+      console.error('✗ Earliest date button NOT found with any method!');
+      console.log('Available buttons on page:', Array.from(document.querySelectorAll('button, input[type="button"]')).map(b => b.textContent || b.value));
+      return { found: false, error: 'Earliest date button not found' };
     }
 
     // Step 3: Check for "Fully Booked" modal

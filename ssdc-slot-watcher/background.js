@@ -6,8 +6,15 @@ let isWatcherRunning = false;
 let isBotPolling = false;
 let lastUpdateId = 0;
 let lastCheckTime = null;
+let checkIntervalId = null; // For intervals < 1 minute
 
 console.log('SSDC Slot Watcher background script loaded');
+
+// Start Telegram bot polling on extension load (so it's always listening)
+if (CONFIG.TELEGRAM_BOT_TOKEN && CONFIG.TELEGRAM_BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
+  console.log('Starting Telegram bot polling on load...');
+  startTelegramBotPolling();
+}
 
 // Initialize on extension installation
 chrome.runtime.onInstalled.addListener(() => {
@@ -17,6 +24,11 @@ chrome.runtime.onInstalled.addListener(() => {
     lastCheck: null,
     botRunning: false
   });
+
+  // Start bot polling on install
+  if (CONFIG.TELEGRAM_BOT_TOKEN && CONFIG.TELEGRAM_BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
+    startTelegramBotPolling();
+  }
 });
 
 // Listen for messages from popup and content scripts
@@ -69,27 +81,61 @@ async function startWatcher() {
     throw new Error('Please add at least one chat ID in config.js');
   }
 
-  // Get custom interval from storage, or use default
-  const storage = await chrome.storage.local.get(['checkInterval']);
-  const intervalMinutes = storage.checkInterval || CONFIG.CHECK_INTERVAL_MINUTES;
+  // Get custom interval from storage (in seconds), or use default
+  const storage = await chrome.storage.local.get(['checkIntervalSeconds']);
+  const intervalSeconds = storage.checkIntervalSeconds || (CONFIG.CHECK_INTERVAL_MINUTES * 60);
 
-  console.log(`Setting up alarm with ${intervalMinutes} minute interval`);
+  console.log(`Setting up watcher with ${intervalSeconds} second interval`);
 
-  // Set up the alarm for periodic checking
-  await chrome.alarms.create('checkSlots', {
-    delayInMinutes: intervalMinutes,
-    periodInMinutes: intervalMinutes
-  });
+  // Clear any existing interval/alarm
+  if (checkIntervalId) {
+    clearInterval(checkIntervalId);
+    checkIntervalId = null;
+  }
+  await chrome.alarms.clear('checkSlots');
 
-  // Start Telegram bot polling
-  startTelegramBotPolling();
+  // For intervals < 60 seconds, use setInterval
+  // For intervals >= 60 seconds, use chrome.alarms
+  if (intervalSeconds < 60) {
+    console.log(`Using setInterval for ${intervalSeconds} second interval`);
+    checkIntervalId = setInterval(async () => {
+      console.log('Interval triggered: checking slots...');
+      await performSlotCheck();
+    }, intervalSeconds * 1000);
+  } else {
+    const intervalMinutes = intervalSeconds / 60;
+    console.log(`Using chrome.alarms for ${intervalMinutes} minute interval`);
+    await chrome.alarms.create('checkSlots', {
+      delayInMinutes: intervalMinutes,
+      periodInMinutes: intervalMinutes
+    });
+  }
+
+  // Start Telegram bot polling (if not already running)
+  if (!isBotPolling) {
+    startTelegramBotPolling();
+  }
 
   // Update state
   isWatcherRunning = true;
   await chrome.storage.local.set({ isWatcherActive: true, botRunning: true });
 
+  // Format interval message
+  let intervalText;
+  if (intervalSeconds < 60) {
+    intervalText = `${intervalSeconds} second${intervalSeconds > 1 ? 's' : ''}`;
+  } else {
+    const mins = Math.floor(intervalSeconds / 60);
+    intervalText = `${mins} minute${mins > 1 ? 's' : ''}`;
+  }
+
+  // Get lesson type
+  const lessonTypeStorage = await chrome.storage.local.get(['lessonType']);
+  const lessonType = lessonTypeStorage.lessonType || 'PL';
+  const lessonTypeName = lessonType === 'PL' ? 'Practical Lesson' : 'Theory Test';
+
   // Send notification to Telegram
-  await sendTelegramMessage(`🟢 SSDC Slot Watcher started!\nI will check for slots every ${intervalMinutes} minute${intervalMinutes > 1 ? 's' : ''}.`);
+  await sendTelegramMessage(`🟢 SSDC Slot Watcher started!\n📚 Type: ${lessonTypeName}\n⏱ Interval: Every ${intervalText}`);
 
   // Trigger immediate first check after a short delay
   console.log('Scheduling immediate first check in 2 seconds...');
@@ -108,12 +154,19 @@ async function stopWatcher() {
   // Clear the alarm
   await chrome.alarms.clear('checkSlots');
 
-  // Stop bot polling
-  stopTelegramBotPolling();
+  // Clear setInterval if running
+  if (checkIntervalId) {
+    clearInterval(checkIntervalId);
+    checkIntervalId = null;
+    console.log('Cleared setInterval');
+  }
+
+  // DON'T stop bot polling - keep it running so Telegram commands still work!
+  // Bot polling should always be active to receive commands
 
   // Update state
   isWatcherRunning = false;
-  await chrome.storage.local.set({ isWatcherActive: false, botRunning: false });
+  await chrome.storage.local.set({ isWatcherActive: false, botRunning: true }); // botRunning stays true!
 
   // Send notification to Telegram
   await sendTelegramMessage('🔴 SSDC Slot Watcher stopped.');
